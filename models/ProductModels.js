@@ -1,9 +1,9 @@
 import {Sequelize} from "sequelize";
-import dbProduct from '../config/dbProduct.js';
+import db from '../config/db.js';
 
 const {DataTypes} = Sequelize;
 
-const Product = dbProduct.define('product', {
+const Product = db.define('product', {
     nama: DataTypes.STRING,
     deskripsi: DataTypes.STRING,
     harga: DataTypes.INTEGER,
@@ -16,5 +16,5 @@ const Product = dbProduct.define('product', {
 export default Product;
 
 (async() =>{
-    await dbProduct.sync();
+    await db.sync();
 }) ();

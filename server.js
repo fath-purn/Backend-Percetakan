@@ -1,15 +1,19 @@
-import Express from "express";
+import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
 import FileUpload from "express-fileupload";
 import ProductsRoute from './routes/ProductRoute.js';
 
-const app = Express();
+const app = express();
 app.use(cors());
+app.use(express.json());
 app.use(FileUpload());
-app.use(Express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(ProductsRoute);
 
-app.use(Express.static('public'));
+app.use(express.static('public'));
 
 const PORT = 3000;
 
