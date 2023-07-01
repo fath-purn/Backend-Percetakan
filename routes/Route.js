@@ -23,6 +23,14 @@ import {
   deleteLayanan
 } from "../controllers/LayananController.js";
 
+import {
+  getBlog,
+  getBlogById,
+  createBlog,
+  updateBlog,
+  deleteBlog
+} from "../controllers/BlogController.js";
+
 const router = express.Router();
 
 // memanggil fungsi Products
@@ -45,5 +53,12 @@ router.get('/layanan/:id', getLayananById);
 router.post('/layanan', createLayanan);
 router.patch('/layanan/:id', updateLayanan);
 router.delete('/layanan/:id', deleteLayanan);
+
+// memanggil fungsi Blog
+router.get('/blog', getBlog);
+router.get('/blog/:id', getBlogById);
+router.post('/blog', createBlog);
+router.patch('/blog/:id', updateBlog);
+router.delete('/blog/:id', deleteBlog);
 
 export default router;
