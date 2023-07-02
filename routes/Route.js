@@ -31,6 +31,14 @@ import {
   deleteBlog
 } from "../controllers/BlogController.js";
 
+import {
+  getFAQ,
+  getFAQById,
+  createFAQ,
+  updateFAQ,
+  deleteFAQ
+} from "../controllers/FAQController.js";
+
 const router = express.Router();
 
 // memanggil fungsi Products
@@ -60,5 +68,12 @@ router.get('/blog/:id', getBlogById);
 router.post('/blog', createBlog);
 router.patch('/blog/:id', updateBlog);
 router.delete('/blog/:id', deleteBlog);
+
+// memanggil fungsi FAQ
+router.get('/faq', getFAQ);
+router.get('/faq/:id', getFAQById);
+router.post('/faq', createFAQ);
+router.patch('/faq/:id', updateFAQ);
+router.delete('/faq/:id', deleteFAQ);
 
 export default router;
