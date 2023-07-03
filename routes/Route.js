@@ -74,6 +74,6 @@ router.get('/faq', getFAQ);
 router.get('/faq/:id', getFAQById);
 router.post('/faq', createFAQ);
 router.patch('/faq/:id', updateFAQ);
-router.delete('/faq/:id', deleteFAQ);
+router.delete('/blog/:id', deleteFAQ);
 
 export default router;
