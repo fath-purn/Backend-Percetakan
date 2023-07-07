@@ -1,0 +1,95 @@
+import express from "express";
+import {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "../controllers/ProductController.js";
+
+import {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../controllers/UserController.js";
+
+import {
+  getLayanan,
+  getLayananById,
+  createLayanan,
+  updateLayanan,
+  deleteLayanan
+} from "../controllers/LayananController.js";
+
+import {
+  getBlog,
+  getBlogById,
+  createBlog,
+  updateBlog,
+  deleteBlog
+} from "../controllers/BlogController.js";
+
+import {
+  getFAQ,
+  getFAQById,
+  createFAQ,
+  updateFAQ,
+  deleteFAQ
+} from "../controllers/FAQController.js";
+
+import { authenticateUser, authorizeUser } from "../middlewares/authMiddleware.js";
+import { validateInput } from "../middlewares/validationMiddleware.js";
+import { handleErrors } from "../middlewares/errorMiddleware.js";
+
+const router = express.Router();
+
+// memanggil fungsi Products
+router.get("/products", authenticateUser, getProducts);
+router.get("/products/:id", authenticateUser, getProductById);
+router.post("/products", authenticateUser, authorizeUser, validateInput, createProduct);
+router.patch("/products/:id", authenticateUser, authorizeUser, validateInput, updateProduct);
+router.delete("/products/:id", authenticateUser, authorizeUser, deleteProduct);
+
+// memanggil fungsi User
+router.get('/users', authenticateUser, getUsers);
+router.get('/users/:id', authenticateUser, getUserById);
+router.post('/users', authenticateUser, authorizeUser, validateInput, createUser);
+router.patch('/users/:id', authenticateUser, authorizeUser, validateInput, updateUser);
+router.delete('/users/:id', authenticateUser, authorizeUser, deleteUser);
+
+// memanggil fungsi Layanan
+router.get('/layanan', authenticateUser, getLayanan);
+router.get('/layanan/:id', authenticateUser, getLayananById);
+router.post('/layanan', authenticateUser, authorizeUser, validateInput, createLayanan);
+router.patch('/layanan/:id', authenticateUser, authorizeUser, validateInput, updateLayanan);
+router.delete('/layanan/:id', authenticateUser, authorizeUser, deleteLayanan);
+
+// memanggil fungsi Blog
+router.get('/blog', authenticateUser, getBlog);
+router.get('/blog/:id', authenticateUser, getBlogById);
+router.post('/blog', authenticateUser, authorizeUser, validateInput, createBlog);
+router.patch('/blog/:id', authenticateUser, authorizeUser, validateInput, updateBlog);
+router.delete('/blog/:id', authenticateUser, authorizeUser, deleteBlog);
+
+// memanggil fungsi FAQ
+router.get('/faq', authenticateUser, getFAQ);
+router.get('/faq/:id', authenticateUser, getFAQById);
+router.post('/faq', authenticateUser, authorizeUser, validateInput, createFAQ);
+router.patch('/faq/:id', authenticateUser, authorizeUser, validateInput, updateFAQ);
+router.delete('/faq/:id', authenticateUser, authorizeUser, deleteFAQ);
+router.use(handleErrors);
+
+export default router;
+
+// import { validateInput } from "../middlewares/inputValidation.js";
+// import { authenticateUser, authorizeUser } from "../middlewares/auth.js";
+// import { handleErrors } from "../middlewares/errorHandling.js";
+// import { secureCommunication } from "../middlewares/secureCommunication.js";
+// import { rateLimiting } from "../middlewares/rateLimiting.js";
+// import { sanitizeInput } from "../middlewares/inputSanitization.js";
+// import { manageSessions } from "../middlewares/sessionManagement.js";
+// import { securePasswordStorage } from "../middlewares/passwordStorage.js";
+// import { protectCSRF } from "../middlewares/csrfProtection.js";
+// import { logAndMonitor } from "../middlewares/loggingMonitoring.js";
