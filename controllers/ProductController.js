@@ -1,6 +1,9 @@
 import Product from "../models/ProductModels.js";
 import path from "path";
 import fs from "fs";
+import {Op} from "sequelize";
+import Sequelize from 'sequelize';
+import mysql from "mysql2";
 
 export const getProducts = async(req, res)=>{
     try {
@@ -23,6 +26,42 @@ export const getProductById = async(req, res)=>{
         console.log(error.message);
     }
 }
+
+export const getProductByName = async (req, res) => {
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search_query || "";
+    const offset = limit * page;
+    const totalRows = await Product.count({
+        where:{
+            [Op.or]: [{nama:{
+                [Op.like]: '%'+search+'%'
+            }}]
+        }
+    }); 
+    const totalPage = Math.ceil(totalRows / limit);
+    const result = await Product.findAll({
+        where:{
+            [Op.or]: [{nama:{
+                [Op.like]: '%'+search+'%'
+            }}]
+        },
+        offset: offset,
+        limit: limit,
+        order:[
+            ['id', 'DESC']
+        ]
+    });
+    res.json(result)
+    // res.json({
+    //     result: result,
+    //     page: page,
+    //     limit: limit,
+    //     totalRows: totalRows,
+    //     totalPage: totalPage
+    // });
+};
+
 
 export const createProduct = (req, res)=>{
     if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});

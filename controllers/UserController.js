@@ -1,164 +1,110 @@
+import express from "express";
+import { body, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import mysql from "mysql2";
+
 import User from "../models/UserModels.js";
 
-// export const getUsers = async(req, res) => {
-//     try {
-//         const users = await User.findAll();
-//         const decryptedUsers = await Promise.all(
-//             users.map(async (user) => {
-//                 const { id, username, password } = user;
-//                 const decryptedPassword = await bcrypt.compare(
-//                     req.body.password,
-//                     password
-//                 );
-//                 return {
-//                     id,
-//                     username,
-//                     password: decryptedPassword ? req.body.password : "********",
-//                 };
-//             })
-//         );
-//         res.status(200).json(decryptedUsers);
-//     } catch (error) {
-//             console.log("haiii" + error.message);
-//     }
-// };
+const connection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "percetakan",
+});
 
-// export const getUserById = async (req, res) => {
-//     try {
-//         const user = await User.findOne({
-//         where: {
-//             id: req.params.id,
-//         },
-//         });
-//         if (!user) {
-//             return res.status(404).json({ error: "User not found" });
-//         }
-//         const isPasswordMatch = await bcrypt.compare(
-//         req.body.password,
-//         user.password
-//         );
-//         if (!isPasswordMatch) {
-//             return res.status(401).json({ error: "Invalid password" });
-//         }
-//         res.status(200).json(user);
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).json({ error: "Server error" });
-//     }
-// };
-
-// export const createUser = async (req, res) => {
-//     try {
-//         const { username, password } = req.body;
-//         const saltRounds = 10; // Number of hashing rounds
-//         const hashedPassword = await bcrypt.hash(password, saltRounds);
-//         const user = {
-//             username,
-//             password: hashedPassword,
-//         };
-//         await User.create(user);
-//         res.status(201).json({ msg: `User Created ${username}` });
-//         } catch (error) {
-//             console.log(error.message);
-//     }
-// };
-
-// export const updateUser = async(req, res) =>{
-//     try {
-//         const user = await User.findOne({
-//           where: {
-//             id: req.params.id,
-//           },
-//         });
-//          if (!user) {
-//           return res.status(404).json({ error: "User not found" });
-//         }
-//          await User.update(req.body, {
-//           where: {
-//             id: req.params.id,
-//           },
-//         });
-//          res.status(200).json({ msg: "User Updated" });
-//       } catch (error) {
-//             console.log(error.message);
-//       }
-//     };
-// export const deleteUser = async (req, res) => {
-//     try {
-//         const user = await User.findOne({
-//             where: {
-//                 id: req.params.id,
-//         },
-//     });
-//         if (!user) {
-//             return res.status(404).json({ error: "User not found" });
-//     }
-//         await User.destroy({
-//             where: {
-//                 id: req.params.id,
-//         },
-//     });
-//         res.status(200).json({ msg: "User Deleted" });
-//     } catch (error) {
-//         onsole.log(error.message);
-//     }
-// }
-
-
-export const getUsers = async(req, res) =>{
-    try {
-        const response = await User.findAll();
-        res.status(200).json(response);
-    } catch (error) {
-        console.log(error.message);
+connection.connect((err) => {
+    if (err) {
+        console.error("Error connecting to MySQL database:", err);
+    } else {
+        console.log("Connected to MySQL database");
     }
-}
+});
 
-export const getUserById = async(req, res) =>{
-    try {
-        const response = await User.findOne({
-            where:{
-                id: req.params.id
+const router = express.Router();
+
+
+// Middleware to validate user registration input
+const validateRegistrationInput = [
+    body("username").notEmpty().withMessage("Username is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
+// Route for user registration
+router.post("/register", validateRegistrationInput, (req, res) => {
+    const { username, password } = req.body;
+    // Check if the username is already taken
+    const checkUsernameQuery = "SELECT * FROM users WHERE username = ?";
+    connection.query(checkUsernameQuery, [username], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Error checking username" });
+        }
+        if (results.length > 0) {
+            return res.status(400).json({ message: "Username already taken" });
+        }
+        // Hash the password
+        const saltRounds = 10;
+        bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
+            if (err) {
+                return res.status(500).json({ message: "Error hashing password" });
             }
-        });
-        res.status(200).json(response);
-    } catch (error) {
-        console.log(error.message);
-    }
-}
-
-export const createUser = async(req, res) =>{
-    try {
-        await User.create(req.body);
-        res.status(201).json({msg: "User Created"});
-    } catch (error) {
-        console.log(error.message);
-    }
-}
-
-export const updateUser = async(req, res) =>{
-    try {
-        await User.update(req.body,{
-            where:{
-                id: req.params.id
+            // Store the new user in the user database
+            const addUserQuery = "INSERT INTO users (username, password) VALUES (?, ?)";
+            connection.query(addUserQuery, [username, hashedPassword], (err) => {
+            if (err) {
+                return res.status(500).json({ message: "Error registering user" });
             }
+            res.status(201).json({ message: "User registered successfully" });
+            });
         });
-        res.status(200).json({msg: "User Updated"});
-    } catch (error) {
-        console.log(error.message);
-    }
-}
+    });
+});
 
-export const deleteUser = async(req, res) =>{
-    try {
-        await User.destroy({
-            where:{
-                id: req.params.id
+ // Middleware to validate user login input
+const validateLoginInput = [
+    body("username").notEmpty().withMessage("Username is required"),
+    body("password").notEmpty().withMessage("Password is required"),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
+// Route for user login
+router.post("/login", validateLoginInput, (req, res) => {
+    const { username, password } = req.body;
+    // Find the user with the provided username
+    const getUserQuery = "SELECT * FROM users WHERE username = ?";
+    connection.query(getUserQuery, [username], (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Error retrieving user" });
+        }
+        if (results.length === 0) {
+            return res.status(401).json({ message: "Invalid username or password" });
+        }
+        const user = results[0];
+        // Compare the provided password with the stored hashed password
+        bcrypt.compare(password, user.password, (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Error comparing passwords" });
             }
+            if (!result) {
+                return res.status(401).json({ message: "Invalid username or password" });
+            }
+            // Generate and sign a JWT token
+            const token = jwt.sign({ username }, "secretKey");
+            res.json({ token });
         });
-        res.status(200).json({msg: "User Deleted"});
-    } catch (error) {
-        console.log(error.message);
-    }
-}
+    });
+});
+export default router;
