@@ -2,8 +2,6 @@ import Product from "../models/ProductModels.js";
 import path from "path";
 import fs from "fs";
 import {Op} from "sequelize";
-import Sequelize from 'sequelize';
-import mysql from "mysql2";
 
 export const getProducts = async(req, res)=>{
     try {
@@ -52,14 +50,14 @@ export const getProductByName = async (req, res) => {
             ['id', 'DESC']
         ]
     });
-    res.json(result)
-    // res.json({
-    //     result: result,
-    //     page: page,
-    //     limit: limit,
-    //     totalRows: totalRows,
-    //     totalPage: totalPage
-    // });
+    // res.json(result)
+    res.json({
+        result: result,
+        page: page,
+        limit: limit,
+        totalRows: totalRows,
+        totalPage: totalPage
+    });
 };
 
 

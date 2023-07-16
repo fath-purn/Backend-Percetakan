@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mysql from "mysql2";
 
-import User from "../models/UserModels.js";
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -44,7 +43,7 @@ router.post("/register", validateRegistrationInput, (req, res) => {
     const checkUsernameQuery = "SELECT * FROM users WHERE username = ?";
     connection.query(checkUsernameQuery, [username], (err, results) => {
         if (err) {
-            return res.status(500).json({ message: "Error checking username" });
+            return res.status(500).json({ message: `Error checking username ${err}` });
         }
         if (results.length > 0) {
             return res.status(400).json({ message: "Username already taken" });
